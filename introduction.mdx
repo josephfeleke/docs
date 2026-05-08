@@ -1,0 +1,90 @@
+---
+title: Introduction
+description: "The Dolphy API gives you OpenAI-compatible access to uncensored AI models — chat, image generation, image editing, video, and motion control."
+---
+
+## What you get
+
+The Dolphy API exposes the same models that power dolphy.chat, behind a clean
+OpenAI-compatible interface. Drop in the official `openai` SDK, change the
+`baseURL`, and you're up and running.
+
+- **Uncensored chat** — Venice Uncensored 1.1, no content moderation
+- **25+ image generation models** — from FLUX 2, Nano Banana 2, GPT Image,
+  Seedream, Lustify, Chroma, and more
+- **NSFW-capable image editing** with Seedream 4.5
+- **Wan 2.5 / Wan 2.7 video generation** at up to 1080p
+- **Kling v3 motion control** to retarget character motion onto a reference video
+
+## Quick start
+
+```ts
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://dolphy.chat/api/v1",
+  apiKey: "dpy_live_...", // get yours at https://dolphy.chat/settings/api-keys
+});
+
+const response = await client.chat.completions.create({
+  model: "venice-uncensored",
+  messages: [{ role: "user", content: "Write a sci-fi opening line." }],
+});
+
+console.log(response.choices[0].message.content);
+```
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://dolphy.chat/api/v1",
+    api_key="dpy_live_...",
+)
+
+response = client.chat.completions.create(
+    model="venice-uncensored",
+    messages=[{"role": "user", "content": "Write a sci-fi opening line."}],
+)
+
+print(response.choices[0].message.content)
+```
+
+## Model groups
+
+| Group            | Endpoint                                           | Notes                                  |
+| ---------------- | -------------------------------------------------- | -------------------------------------- |
+| Chat             | `POST /v1/chat/completions`                        | OpenAI-compatible, streaming supported |
+| Image generation | `POST /v1/images/generations`                      | OpenAI-compatible                      |
+| Image editing    | `POST /v1/images/edits`                            | NSFW-capable Seedream 4.5              |
+| Video            | `POST /v1/video/queue` + `POST /v1/video/retrieve` | Async — queue then poll                |
+| Motion control   | `POST /v1/video/motion-control`                    | Async, poll via `/v1/video/retrieve`   |
+| Models list      | `GET /v1/models`                                   | Lists everything available             |
+
+## Billing
+
+API requests draw from the same credit balance you use on dolphy.chat. There
+is no separate billing system — buy credits at
+[dolphy.chat/credits](https://dolphy.chat/credits) and they fund both your
+web usage and your API calls.
+
+Members get **almost 55% more credits per dollar** on every credit purchase.
+See [Pricing](/pricing) for the exact credit cost per endpoint.
+
+## Limits
+
+- 60 chat requests / minute per API key
+- 30 image requests / minute per API key
+- 5 video requests / minute per API key
+- Up to 10 active API keys per account
+
+Hit one of these and you'll get a `429` with a `Retry-After` hint.
+
+## What we don't have (yet)
+
+- Webhooks (you poll for video completion)
+- Per-key cost caps (set Stripe spending limits instead)
+- Usage analytics dashboard for API customers (coming soon)
+
+If you need any of these, [tell us](mailto:support@dolphy.chat) — we
+prioritize based on what real customers ask for.

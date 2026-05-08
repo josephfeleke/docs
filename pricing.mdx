@@ -1,0 +1,82 @@
+---
+title: Pricing
+description: "Credit costs per endpoint and how billing works."
+---
+
+## How credits work
+
+The Dolphy API uses the same credit pool as dolphy.chat. Buy credits at
+[dolphy.chat/credits](https://dolphy.chat/credits), and use them to pay for
+both web and API usage. No separate API billing or invoicing.
+
+| Tier       | Cost per credit | Notes                                |
+| ---------- | --------------- | ------------------------------------ |
+| Member     | $0.065          | Unlocks ~55% more credits per dollar |
+| Non-member | $0.0999         | Standard rate                        |
+
+Members buy 153 credits for the same $9.99 that non-members spend on 100.
+
+## Chat completions
+
+**1 credit per 10,000 tokens** (input + output combined). Minimum 1 credit
+per call. Tracked via the `usage` block returned by the upstream model.
+
+A typical short chat call (200 input + 300 output tokens = 500 total) costs
+**1 credit**. A long-context conversation with 50,000 tokens costs **5
+credits**.
+
+## Image generation
+
+Per-image cost depends on the model. From `GET /v1/models`:
+
+| Model                                                                                                         | Credits/image | Quality tier                  |
+| ------------------------------------------------------------------------------------------------------------- | ------------- | ----------------------------- |
+| `lustify-v8`, `lustify-v7`, `chroma`, `z-image-turbo`, `wai-Illustrious`                                      | 1             | NSFW-capable specialty models |
+| `venice-sd35`, `hidream`, `qwen-image`                                                                        | 1             | Standard                      |
+| `flux-2-pro`, `wan-2-7-text-to-image`, `recraft-v4`, `seedream-v4`, `seedream-v5-lite`                        | 1             | Standard                      |
+| `flux-2-max`, `hunyuan-image-v3`, `imagineart-1.5-pro`, `wan-2-7-pro-text-to-image`, `grok-imagine-image-pro` | 2             | Premium                       |
+| `nano-banana-2`, `qwen-image-2-pro`                                                                           | 3             | Pro tier                      |
+| `nano-banana-pro`                                                                                             | 5             | Pro+                          |
+| `gpt-image-2`, `gpt-image-1-5`                                                                                | 8             | OpenAI flagship               |
+| `recraft-v4-pro`                                                                                              | 9             | Top-tier                      |
+
+Multi-image requests (`n > 1`) bill linearly: `n × per-image cost`.
+
+## Image editing
+
+**2 credits per edit.** Single model — `seedream-4.5`. NSFW-capable.
+
+## Video generation
+
+Per-video cost depends on duration and resolution. Cheapest variant is 5s
+480p at 10 credits; most expensive is 10s 1080p at 55 credits.
+
+| Duration / Resolution | 480p | 720p | 1080p |
+| --------------------- | ---- | ---- | ----- |
+| 5s text-to-video      | 10   | 15   | 25    |
+| 10s text-to-video     | 18   | 28   | 45    |
+| 5s image-to-video     | 12   | 18   | 35    |
+| 10s image-to-video    | 22   | 35   | 55    |
+
+Use `POST /v1/video/quote` to get an exact credit cost before queueing.
+
+## Motion control
+
+**5 credits per second** of reference video. A 10-second clip costs 50
+credits. Includes character swap + motion retargeting via Kling v3.
+
+## What happens if you run out mid-stream
+
+Chat: we still complete the response, deduct what we can, and your next
+call returns `402` until you top up. We never cut off in the middle of a
+streaming response.
+
+Image / video / motion: pre-flight balance check. If you can't cover the
+full cost, the call fails with `402` before we touch the upstream
+provider. No partial billing.
+
+## Failed requests
+
+If a call fails on our side or upstream returns `5xx`, you don't get
+charged. For video specifically, if a queued job times out or errors, we
+**automatically refund** the credits you spent at queue time.

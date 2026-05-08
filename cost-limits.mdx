@@ -1,0 +1,52 @@
+---
+title: Cost Limits
+description: "Cap a key's daily credit spend to protect against runaway agents."
+---
+
+## Why
+
+Bots and autonomous agents make a lot of API calls. Without a cap, a
+prompt-loop bug at 3am can drain your credit balance overnight. Set a
+**daily credit limit** per key and we'll return `429` once it's hit —
+the limit resets at 00:00 UTC.
+
+## Set via dashboard
+
+1. Visit [dolphy.chat/settings/api-keys](https://dolphy.chat/settings/api-keys)
+2. Click **Manage** on the key
+3. Set "Max credits per day" → Save
+
+## Set via API
+
+```bash
+curl -X PATCH https://dolphy.chat/api/account/api-keys/dpy_live_abc12345 \
+  -H "Authorization: Bearer <firebase-id-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"maxCreditsPerDay": 500}'
+```
+
+Pass `null` to remove the limit.
+
+## When the limit is hit
+
+```json
+{
+  "error": {
+    "message": "Daily cost limit reached (500 credits). Resets at 00:00 UTC.",
+    "type": "daily_limit",
+    "code": null,
+    "param": null
+  }
+}
+```
+
+Status: `429`. Wait until 00:00 UTC or top up the limit via the dashboard.
+
+## Notes
+
+- Limits are **per key**, not per account. A 500 cr/day limit on one key
+  doesn't affect another key on the same account.
+- Limit checking is atomic with the deduction — concurrent calls can't
+  blow past the cap.
+- Resets are UTC. If you're in PST and want a "midnight" reset that
+  matches your local day, just remember 00:00 UTC = 4pm or 5pm PST.

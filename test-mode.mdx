@@ -1,0 +1,95 @@
+---
+title: Test Mode
+description: "Cost-free API testing with `dpy_test_*` keys."
+---
+
+## What test mode is
+
+Stripe-style separate keys for development. **Test keys** (`dpy_test_*`)
+let you call every endpoint, get real responses from real models, and
+verify your integration — without spending real credits.
+
+Each test key gets a **daily virtual pool of 100 credits** that resets at
+00:00 UTC. Calls bill against this pool, not your real credit balance.
+
+## Why we still call real models
+
+We considered mocking responses (canned image bytes, fake SSE chunks),
+but mock outputs don't help you test prompt quality, content filters, or
+streaming behavior. Real-model output makes test mode actually useful.
+
+The 100 credits/day cap means our exposure is ~$5/day per active test
+account — a fair marketing cost for getting devs onboarded.
+
+## Get a test key
+
+1. [dolphy.chat/settings/api-keys](https://dolphy.chat/settings/api-keys)
+2. Click "New key" → choose **dpy*test*…** mode → name it
+3. Copy the plaintext key (shown once)
+
+No membership required for test keys.
+
+## Use it
+
+Identical to live keys — just swap the `apiKey`:
+
+```ts
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://dolphy.chat/api/v1",
+  apiKey: "dpy_test_...", // test key
+});
+
+const r = await client.chat.completions.create({
+  model: "venice-uncensored",
+  messages: [{ role: "user", content: "hi" }],
+});
+
+console.log(r); // includes `dolphy_test_mode: true` so you can detect at runtime
+```
+
+Every test response includes `dolphy_test_mode: true` at the top level so
+your client code can branch (e.g., skip persisting a test image).
+
+## When the daily pool runs out
+
+```json
+{
+  "error": {
+    "message": "Daily cost limit reached (100 credits). Resets at 00:00 UTC.",
+    "type": "daily_limit",
+    "code": null,
+    "param": null
+  }
+}
+```
+
+Wait until 00:00 UTC for the pool to reset, or switch to a `dpy_live_*`
+key for production traffic.
+
+## Differences from live keys
+
+|                                      | Live (`dpy_live_*`)  | Test (`dpy_test_*`)              |
+| ------------------------------------ | -------------------- | -------------------------------- |
+| Membership required                  | Yes                  | No                               |
+| Bills against                        | Real credit balance  | Daily virtual pool               |
+| Daily limit                          | Configurable per key | Fixed at 100 cr                  |
+| Real model output                    | Yes                  | Yes (we actually call providers) |
+| Refunds on failure                   | To real credits      | To virtual pool                  |
+| Webhook delivery                     | Yes                  | Yes                              |
+| Response includes `dolphy_test_mode` | No                   | Yes                              |
+
+## Mixed test + live
+
+A single account can have both kinds of keys. Same 10-key limit applies.
+Test and live billing pools are separate — test usage never touches real
+credits, live usage never touches the virtual pool.
+
+## Going to production
+
+Once your integration works against a test key:
+
+1. Create a `dpy_live_*` key on the same account
+2. Replace the `apiKey` value in your code
+3. That's it — same baseURL, same endpoints, same shapes

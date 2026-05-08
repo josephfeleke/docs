@@ -1,0 +1,154 @@
+---
+title: Webhooks
+description: "Stop polling. Get a POST when your queued video terminates."
+---
+
+## What gets delivered
+
+When a video you queued via `/v1/video/queue` or `/v1/video/motion-control`
+reaches a terminal state, we POST to your registered URL with the result.
+Two events:
+
+| Event             | Sent when                                                             |
+| ----------------- | --------------------------------------------------------------------- |
+| `video.completed` | Video finished generating, URL ready                                  |
+| `video.failed`    | Job timed out, failed upstream, or expired (credits already refunded) |
+
+## Setup
+
+1. Go to [dolphy.chat/settings/api-keys](https://dolphy.chat/settings/api-keys)
+2. Click your API key → "Configure webhook"
+3. Paste an `https://` URL we should POST to
+4. Copy the **webhook secret** (shown ONCE) — you'll use it to verify signatures
+
+You can also configure via the API:
+
+```bash
+curl -X PATCH https://dolphy.chat/api/account/api-keys/dpy_live_abc12345/webhook \
+  -H "Authorization: Bearer <firebase-id-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://your-app.example.com/dolphy-webhook"}'
+# → { "ok": true, "secret": "kK3X..." }   ← save this
+```
+
+## Payload shape
+
+```json
+{
+  "id": "wh_FjkW3hQ_completed",
+  "event": "video.completed",
+  "created": 1730000000,
+  "data": {
+    "id": "FjkW3hQ",
+    "status": "COMPLETED",
+    "url": "https://firebasestorage.googleapis.com/...mp4",
+    "credits_used": 18
+  }
+}
+```
+
+For failures:
+
+```json
+{
+  "id": "wh_FjkW3hQ_failed",
+  "event": "video.failed",
+  "created": 1730000000,
+  "data": {
+    "id": "FjkW3hQ",
+    "status": "FAILED",
+    "reason": "Video expired upstream",
+    "credits_used": 18
+  }
+}
+```
+
+## Headers we send
+
+| Header                      | Value                               |
+| --------------------------- | ----------------------------------- |
+| `Content-Type`              | `application/json`                  |
+| `User-Agent`                | `Dolphy-Webhook/1.0`                |
+| `X-Dolphy-Event`            | `video.completed` or `video.failed` |
+| `X-Dolphy-Signature`        | `t=<unix>,v1=<hex_hmac>`            |
+| `X-Dolphy-Delivery-Id`      | Stable id for deduping retries      |
+| `X-Dolphy-Delivery-Attempt` | `1`, `2`, or `3`                    |
+
+## Verifying signatures
+
+Always verify before processing — don't trust the request body otherwise.
+HMAC-SHA256 of `<timestamp>.<rawBody>` with your secret should match `v1`.
+
+```ts
+import crypto from "crypto";
+
+function verifyDolphySignature(
+  rawBody: string,
+  signatureHeader: string,
+  secret: string,
+): boolean {
+  const m = signatureHeader.match(/t=(\d+),v1=([a-f0-9]+)/);
+  if (!m) return false;
+  const [, t, v1] = m;
+  // Reject events older than 5 min to defend against replay
+  if (Math.floor(Date.now() / 1000) - parseInt(t) > 300) return false;
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(`${t}.${rawBody}`)
+    .digest("hex");
+  return crypto.timingSafeEqual(Buffer.from(v1), Buffer.from(expected));
+}
+```
+
+```python
+import hmac, hashlib, time
+
+def verify_dolphy_signature(raw_body: bytes, signature_header: str, secret: str) -> bool:
+    parts = dict(p.split("=") for p in signature_header.split(","))
+    t = int(parts.get("t", "0"))
+    v1 = parts.get("v1", "")
+    if int(time.time()) - t > 300:  # reject > 5min old
+        return False
+    expected = hmac.new(secret.encode(), f"{t}.{raw_body.decode()}".encode(), hashlib.sha256).hexdigest()
+    return hmac.compare_digest(v1, expected)
+```
+
+## Retry behavior
+
+If your endpoint returns non-2xx (or times out at 10s), we retry:
+
+1. **Attempt 1** — immediately
+2. **Attempt 2** — after 5 seconds
+3. **Attempt 3** — after 25 more seconds
+
+After 3 failed attempts we give up. The delivery is logged in our
+internal `webhookDeliveries` so you can see the response body / status
+in support if needed.
+
+## Idempotency
+
+Same `id` is used across all retries of a single event. **Dedupe by
+`id`** in your handler — we may legitimately retry up to 3 times if
+your endpoint had a hiccup, and we don't want you to double-process.
+
+## Rotating the secret
+
+```bash
+curl -X PATCH https://dolphy.chat/api/account/api-keys/dpy_live_abc12345/webhook \
+  -H "Authorization: Bearer <firebase-id-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"regenerateSecret": true}'
+```
+
+Returns the new secret once. Any in-flight retries continue using the
+old secret (we cache it on the delivery doc). New events use the new
+secret.
+
+## Disabling webhooks
+
+```bash
+curl -X PATCH .../webhook -d '{"url": null}'
+```
+
+Clears both the URL and the secret. You'll go back to polling
+`/v1/video/retrieve`.

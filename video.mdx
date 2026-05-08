@@ -1,0 +1,86 @@
+---
+title: Video Generation
+description: "Async video generation with Wan 2.5 / Wan 2.7. Queue, then poll."
+---
+
+## Async flow
+
+Video generation takes 30s–10min depending on resolution and queue depth.
+Three endpoints: **queue** to start, **retrieve** to poll, **quote** to
+get the credit cost up front.
+
+```
+POST /v1/video/quote      → returns { credits, estimatedCostUsd }
+POST /v1/video/queue      → returns { id, queue_id, status: "PROCESSING" }
+POST /v1/video/retrieve   → returns { status: "PROCESSING" | "COMPLETED" | "FAILED", url? }
+```
+
+## 1. Quote (optional)
+
+Get the credit cost before queueing:
+
+```bash
+curl -X POST https://dolphy.chat/api/v1/video/quote \
+  -H "Authorization: Bearer $DOLPHY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"wan-2-7-image-to-video","duration":"5s","resolution":"720p"}'
+
+# → {"model":"...","duration":"5s","resolution":"720p","credits":18,
+#    "estimatedCostUsd":{"member":1.17,"nonMember":1.80}}
+```
+
+## 2. Queue
+
+```bash
+curl -X POST https://dolphy.chat/api/v1/video/queue \
+  -H "Authorization: Bearer $DOLPHY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "wan-2-7-image-to-video",
+    "prompt": "a dolphin swims through nebula clouds",
+    "duration": "5s",
+    "resolution": "720p",
+    "image_url": "https://your-cdn.example.com/source.jpg"
+  }'
+
+# → {"id":"FjkW...","queue_id":"c13a...","model":"wan-2-7-image-to-video",
+#    "status":"PROCESSING","credits_charged":18}
+```
+
+| Field                  | Notes                                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `model`                | `wan-2-7-image-to-video`, `wan-2-7-reference-to-video`, `wan-2.5-preview-text-to-video`, `wan-2.5-preview-image-to-video` |
+| `prompt`               | Up to 5000 chars                                                                                                          |
+| `duration`             | `5s` or `10s`                                                                                                             |
+| `resolution`           | `480p`, `720p`, `1080p`                                                                                                   |
+| `aspect_ratio`         | `16:9`, `9:16`, `1:1`, `4:3`, `3:4`                                                                                       |
+| `audio`                | Boolean — generate background audio                                                                                       |
+| `image_url`            | For image-to-video                                                                                                        |
+| `reference_image_urls` | Up to 4 URLs for reference-to-video                                                                                       |
+
+## 3. Retrieve (poll)
+
+```bash
+curl -X POST https://dolphy.chat/api/v1/video/retrieve \
+  -H "Authorization: Bearer $DOLPHY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"id":"FjkW..."}'
+
+# While processing: {"id":"FjkW...","status":"PROCESSING"}
+# When ready:      {"id":"FjkW...","status":"COMPLETED","url":"https://...","credits_used":18}
+# On failure:      {"id":"FjkW...","status":"FAILED","reason":"..."}
+```
+
+Poll every 5–15 seconds. The `url` is a permanent Firebase Storage CDN
+link (token-authenticated, no expiry).
+
+## Refunds
+
+If a queued video fails (timeout, upstream error, expired source URL),
+your credits are **automatically refunded** to your account balance. No
+action needed.
+
+## Pricing
+
+See [Pricing](/pricing). 10 credits (5s/480p) up to 55 credits (10s/1080p
+image-to-video).

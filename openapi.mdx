@@ -1,0 +1,63 @@
+---
+title: OpenAPI Spec
+description: "Machine-readable OpenAPI 3.0 spec for the Dolphy API."
+---
+
+## Where to find it
+
+```
+GET https://dolphy.chat/api/v1/openapi.json
+```
+
+Public endpoint, no auth required. Cached at the edge for 1 hour.
+
+## What you can do with it
+
+### Auto-generate SDKs
+
+Any language. Examples:
+
+```bash
+# TypeScript
+npx openapi-typescript https://dolphy.chat/api/v1/openapi.json -o dolphy.d.ts
+
+# Python
+openapi-python-client generate --url https://dolphy.chat/api/v1/openapi.json
+
+# Go
+oapi-codegen -package dolphy https://dolphy.chat/api/v1/openapi.json > dolphy.go
+
+# Rust
+cargo install openapi-generator-cli
+openapi-generator-cli generate -i https://dolphy.chat/api/v1/openapi.json -g rust -o dolphy-rust
+```
+
+### Try in Postman / Insomnia / Stoplight
+
+1. **Postman**: File → Import → Link → paste the URL
+2. **Insomnia**: Import / Export → URL → paste
+3. **Stoplight Studio**: New API → Import OpenAPI → URL
+
+You'll get every endpoint pre-loaded with example requests, ready to fire
+once you add your `Authorization: Bearer dpy_live_...` header.
+
+### Schema validation
+
+Use the spec to validate requests against your client code at build time:
+
+```ts
+import spec from "./dolphy-openapi.json";
+import Ajv from "ajv";
+const ajv = new Ajv();
+const validate = ajv.compile(spec.components.schemas.ChatRequest);
+if (!validate(myRequestBody)) console.error(validate.errors);
+```
+
+## Notes
+
+- The spec describes our **stable v1 surface**. Anything not in the spec
+  may change without notice.
+- We update the spec on every deploy. Cache it locally if you generate
+  SDKs from it — re-pull on releases.
+- For interactive "Try it" testing, use this docs site directly — every
+  endpoint page has a code playground powered by this same spec.

@@ -1,0 +1,61 @@
+---
+title: Authentication
+description: "Authenticating with the Dolphy API."
+---
+
+## API keys
+
+Every request to the Dolphy API must include a Bearer token in the
+`Authorization` header. Keys are created at
+[dolphy.chat/settings/api-keys](https://dolphy.chat/settings/api-keys) and
+look like:
+
+```
+dpy_live_<32 random chars>
+```
+
+```bash
+curl https://dolphy.chat/api/v1/models \
+  -H "Authorization: Bearer dpy_live_..."
+```
+
+Keys are tied to your Dolphy account and bill against your account's credit
+balance.
+
+## Membership requirement
+
+API access requires an active **Dolphy Membership**. The membership covers
+the API key issuance — your actual API usage is paid separately from your
+credit balance.
+
+If you don't have a membership yet, sign up at
+[dolphy.chat/membership](https://dolphy.chat/membership). It's $14.99/mo
+(yearly available at $99.99/yr) and unlocks 100 monthly bonus credits plus
+~55% more credits per dollar on every future credit purchase.
+
+## Storing keys safely
+
+Plain-text keys are shown **only once**, at creation time. We store a
+SHA-256 hash on our side; we never see your key after the moment you copy
+it. If you lose it, revoke and create a new one.
+
+**Don't:**
+
+- Commit keys to git (we automatically scan public Github for exposed
+  `dpy_live_` keys and revoke matches)
+- Hardcode in client-side code (the key would ship to users' browsers)
+- Share via email, Slack, or any unencrypted channel
+
+**Do:**
+
+- Store in environment variables (`DOLPHY_API_KEY`)
+- Use a secrets manager (Doppler, 1Password, Vault, AWS Secrets Manager)
+- Create separate keys per environment (`production`, `staging`, `local`)
+- Revoke any key you suspect was exposed
+
+## Revoking keys
+
+You can revoke keys at any time from
+[dolphy.chat/settings/api-keys](https://dolphy.chat/settings/api-keys).
+Revocation is immediate — within a few seconds, all in-flight requests
+will start returning `401`.

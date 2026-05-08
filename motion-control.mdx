@@ -1,0 +1,51 @@
+---
+title: Motion Control
+description: "POST /v1/video/motion-control — retarget character motion from a reference video using Kling v3."
+---
+
+## What it does
+
+Takes a still image of a character + a reference video, and produces a new
+video with your character performing the motion from the reference video.
+
+## Request
+
+```json
+{
+  "image_url": "https://your-cdn.example.com/character.jpg",
+  "video_url": "https://your-cdn.example.com/reference-motion.mp4",
+  "duration_seconds": 5,
+  "prompt": "in a futuristic neon city",
+  "keep_original_sound": false,
+  "character_orientation": "video"
+}
+```
+
+| Field                   | Notes                                                             |
+| ----------------------- | ----------------------------------------------------------------- |
+| `image_url`             | Character still — public URL                                      |
+| `video_url`             | Reference motion — public URL                                     |
+| `duration_seconds`      | 1–30. Affects credit cost (5 credits/sec)                         |
+| `prompt`                | Optional scene description                                        |
+| `keep_original_sound`   | If true, preserves the reference video's audio                    |
+| `character_orientation` | `image` (match the still's pose) or `video` (match the reference) |
+
+## Response
+
+```json
+{
+  "id": "FjkW...",
+  "queue_id": "fal-...",
+  "model": "kling-v3-motion-control",
+  "status": "PROCESSING",
+  "credits_charged": 25
+}
+```
+
+Poll via `POST /v1/video/retrieve` with the returned `id`. Same response
+shape as regular video retrieve.
+
+## Billing
+
+**5 credits per second** of `duration_seconds`. A 5-second clip = 25
+credits. Refunded automatically on failure.

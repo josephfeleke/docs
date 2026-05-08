@@ -1,0 +1,79 @@
+---
+title: Image Generation
+description: "POST /v1/images/generations — generate images with 25+ models including uncensored options."
+---
+
+## Endpoint
+
+```
+POST https://dolphy.chat/api/v1/images/generations
+```
+
+OpenAI-compatible. Use the official `openai` SDK or call directly.
+
+## Request
+
+```json
+{
+  "model": "lustify-v8",
+  "prompt": "a dolphin wearing an astronaut helmet, 4k",
+  "n": 1,
+  "size": "1024x1024",
+  "response_format": "url"
+}
+```
+
+| Field             | Type   | Notes                                                           |
+| ----------------- | ------ | --------------------------------------------------------------- |
+| `model`           | string | See [`/v1/models`](/models) for the list. Default `lustify-v8`. |
+| `prompt`          | string | Up to 5000 chars                                                |
+| `n`               | int    | 1–4                                                             |
+| `size`            | string | `1024x1024`, `1792x1024`, `1024x1792`, or any `WxH`             |
+| `response_format` | enum   | `url` (default, served from our CDN) or `b64_json`              |
+| `negative_prompt` | string | Optional Venice-style negative prompt                           |
+| `seed`            | int    | Reproducibility                                                 |
+| `style_preset`    | string | Provider-specific                                               |
+
+## Response
+
+```json
+{
+  "created": 1730000000,
+  "data": [{ "url": "https://firebasestorage.googleapis.com/..." }]
+}
+```
+
+## Code samples
+
+```ts
+const r = await client.images.generate({
+  model: "lustify-v8",
+  prompt: "a cinematic dolphin in space",
+  n: 2,
+  size: "1024x1024",
+});
+console.log(r.data.map((d) => d.url));
+```
+
+```python
+r = client.images.generate(
+  model="lustify-v8",
+  prompt="a cinematic dolphin in space",
+  n=2,
+  size="1024x1024",
+)
+print([d.url for d in r.data])
+```
+
+## NSFW models
+
+Specialty / uncensored models (`lustify-v8`, `lustify-v7`, `chroma`,
+`z-image-turbo`, `wai-Illustrious`) skip provider-side content moderation.
+Standard models (Google, OpenAI, etc.) will refuse explicit prompts and
+return `422`. Pick the right model for your use case.
+
+## Billing
+
+See [Pricing](/pricing). Per-image cost ranges from 1 credit (specialty
+models) to 9 credits (Recraft V4 Pro). Multi-image (`n > 1`) bills
+linearly.

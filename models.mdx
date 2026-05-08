@@ -1,0 +1,49 @@
+---
+title: Models
+description: "GET /v1/models — list every model available on the Dolphy API."
+---
+
+## Endpoint
+
+```
+GET https://dolphy.chat/api/v1/models
+```
+
+OpenAI-compatible model listing. Returns `{ object: "list", data: [...] }`
+with one object per model.
+
+## Response shape
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "venice-uncensored",
+      "object": "model",
+      "owned_by": "dolphy",
+      "capabilities": ["chat", "completion", "streaming"],
+      "pricing": { "credits_per_10k_tokens": 1 }
+    },
+    {
+      "id": "lustify-v8",
+      "object": "model",
+      "owned_by": "dolphy",
+      "capabilities": ["image-generation"],
+      "provider": "Specialty",
+      "description": "Newest Lustify — sharpest realism",
+      "uncensored": true,
+      "pricing": { "credits_per_image": 1 }
+    }
+    // …
+  ]
+}
+```
+
+Each model includes:
+
+- `id` — pass this string in the relevant endpoint's `model` field
+- `capabilities` — what kind of endpoint accepts it
+- `pricing` — credit cost (per image, per 10k tokens, etc.)
+- `uncensored` (image gen only) — true for NSFW-capable models
+- `provider` (image gen only) — labelling for UI grouping

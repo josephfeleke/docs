@@ -1,0 +1,98 @@
+---
+title: Model Permissions
+description: "Restrict which models a key can call. Useful for staging keys, SFW-only deployments, or cost control."
+---
+
+## How it works
+
+Each key has two optional fields:
+
+- **`allowedModels`** — if non-empty, only these models are usable
+- **`blockedModels`** — always rejected; takes precedence over allowed
+
+Empty / null on both = all models allowed (default behavior).
+
+## Set via dashboard
+
+[dolphy.chat/settings/api-keys](https://dolphy.chat/settings/api-keys) →
+Manage on the key → enter comma-separated model ids.
+
+## Set via API
+
+```bash
+curl -X PATCH https://dolphy.chat/api/account/api-keys/dpy_live_abc12345 \
+  -H "Authorization: Bearer <firebase-id-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "allowedModels": ["lustify-v8", "venice-uncensored"],
+    "blockedModels": ["nano-banana-pro", "gpt-image-2"]
+  }'
+```
+
+Pass `null` or `[]` to clear either list.
+
+## Common patterns
+
+### "Only the cheap models on the dev key"
+
+```json
+{
+  "allowedModels": [
+    "lustify-v8",
+    "lustify-v7",
+    "chroma",
+    "z-image-turbo",
+    "wai-Illustrious",
+    "venice-sd35",
+    "hidream"
+  ]
+}
+```
+
+All 1-credit/image models. Caps surprise spend on premium models.
+
+### "SFW-only for the customer-facing app"
+
+```json
+{
+  "blockedModels": [
+    "lustify-v8",
+    "lustify-v7",
+    "lustify-sdxl",
+    "chroma",
+    "z-image-turbo",
+    "wai-Illustrious"
+  ]
+}
+```
+
+Blocks every `uncensored: true` model from the model registry.
+
+### "Just chat for the AI agent"
+
+```json
+{ "allowedModels": ["venice-uncensored"] }
+```
+
+Blocks every image and video model. Only chat allowed.
+
+## When a request hits a blocked model
+
+```json
+{
+  "error": {
+    "message": "This API key is not permitted to use model \"nano-banana-pro\".",
+    "type": "model_forbidden",
+    "code": null,
+    "param": null
+  }
+}
+```
+
+Status: `403`. The customer should either change the model in their
+request or update the key's permissions.
+
+## Listing model ids
+
+`GET /v1/models` returns all available model ids with their pricing and
+capabilities. Use this to populate a model picker in your client.

@@ -1,0 +1,62 @@
+---
+title: Image Editing
+description: "POST /v1/images/edits — edit images with natural language using Seedream 4.5."
+---
+
+## Endpoint
+
+```
+POST https://dolphy.chat/api/v1/images/edits
+```
+
+Single backend model: `seedream-4.5` (NSFW-capable, runs on Novita with
+Replicate fallback).
+
+## Request
+
+Unlike OpenAI's edits API which uses multipart/form-data, ours takes JSON
+with a base64-encoded image. Easier for backend customers.
+
+```json
+{
+  "image": "iVBORw0KGgo...",
+  "prompt": "make the sky purple",
+  "response_format": "url"
+}
+```
+
+| Field             | Type   | Notes                                                                                                                     |
+| ----------------- | ------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `image`           | string | Base64-encoded source (PNG/JPG/WebP). Up to 25MB raw. Strip the `data:image/...;base64,` prefix or include it; both work. |
+| `prompt`          | string | Up to 32000 chars                                                                                                         |
+| `response_format` | enum   | `url` (default) or `b64_json`                                                                                             |
+
+## Response
+
+```json
+{
+  "created": 1730000000,
+  "data": [{ "url": "https://firebasestorage.googleapis.com/..." }]
+}
+```
+
+## Code
+
+```ts
+import fs from "fs";
+const b64 = fs.readFileSync("./input.jpg").toString("base64");
+const r = await fetch("https://dolphy.chat/api/v1/images/edits", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${process.env.DOLPHY_API_KEY}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ image: b64, prompt: "make the sky purple" }),
+});
+const { data } = await r.json();
+console.log(data[0].url);
+```
+
+## Billing
+
+**2 credits per edit.** No per-image-size variance.
