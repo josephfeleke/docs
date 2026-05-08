@@ -1,6 +1,6 @@
 ---
 title: Image Generation
-description: "POST /v1/images/generations — generate images with 25+ models including uncensored options."
+description: "POST /v1/images/generations — generate images with 25+ models across all styles."
 ---
 
 ## Endpoint
@@ -65,12 +65,13 @@ r = client.images.generate(
 print([d.url for d in r.data])
 ```
 
-## NSFW models
+## Specialty models
 
-Specialty / uncensored models (`lustify-v8`, `lustify-v7`, `chroma`,
-`z-image-turbo`, `wai-Illustrious`) skip provider-side content moderation.
-Standard models (Google, OpenAI, etc.) will refuse explicit prompts and
-return `422`. Pick the right model for your use case.
+Specialty creative-mode models (`lustify-v8`, `lustify-v7`, `chroma`,
+`z-image-turbo`, `wai-Illustrious`) skip provider-side content filtering.
+Standard models (Google, OpenAI, etc.) enforce stricter content policies
+and may return `422` on rejected prompts. Pick the right model for your
+use case.
 
 ## Billing
 

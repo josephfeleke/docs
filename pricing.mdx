@@ -29,22 +29,22 @@ credits**.
 
 Per-image cost depends on the model. From `GET /v1/models`:
 
-| Model                                                                                                         | Credits/image | Quality tier                  |
-| ------------------------------------------------------------------------------------------------------------- | ------------- | ----------------------------- |
-| `lustify-v8`, `lustify-v7`, `chroma`, `z-image-turbo`, `wai-Illustrious`                                      | 1             | NSFW-capable specialty models |
-| `venice-sd35`, `hidream`, `qwen-image`                                                                        | 1             | Standard                      |
-| `flux-2-pro`, `wan-2-7-text-to-image`, `recraft-v4`, `seedream-v4`, `seedream-v5-lite`                        | 1             | Standard                      |
-| `flux-2-max`, `hunyuan-image-v3`, `imagineart-1.5-pro`, `wan-2-7-pro-text-to-image`, `grok-imagine-image-pro` | 2             | Premium                       |
-| `nano-banana-2`, `qwen-image-2-pro`                                                                           | 3             | Pro tier                      |
-| `nano-banana-pro`                                                                                             | 5             | Pro+                          |
-| `gpt-image-2`, `gpt-image-1-5`                                                                                | 8             | OpenAI flagship               |
-| `recraft-v4-pro`                                                                                              | 9             | Top-tier                      |
+| Model                                                                                                         | Credits/image | Quality tier            |
+| ------------------------------------------------------------------------------------------------------------- | ------------- | ----------------------- |
+| `lustify-v8`, `lustify-v7`, `chroma`, `z-image-turbo`, `wai-Illustrious`                                      | 1             | Specialty creative-mode |
+| `venice-sd35`, `hidream`, `qwen-image`                                                                        | 1             | Standard                |
+| `flux-2-pro`, `wan-2-7-text-to-image`, `recraft-v4`, `seedream-v4`, `seedream-v5-lite`                        | 1             | Standard                |
+| `flux-2-max`, `hunyuan-image-v3`, `imagineart-1.5-pro`, `wan-2-7-pro-text-to-image`, `grok-imagine-image-pro` | 2             | Premium                 |
+| `nano-banana-2`, `qwen-image-2-pro`                                                                           | 3             | Pro tier                |
+| `nano-banana-pro`                                                                                             | 5             | Pro+                    |
+| `gpt-image-2`, `gpt-image-1-5`                                                                                | 8             | OpenAI flagship         |
+| `recraft-v4-pro`                                                                                              | 9             | Top-tier                |
 
 Multi-image requests (`n > 1`) bill linearly: `n × per-image cost`.
 
 ## Image editing
 
-**2 credits per edit.** Single model — `seedream-4.5`. NSFW-capable.
+**2 credits per edit.** Single model — `seedream-4.5`. Specialty creative-mode.
 
 ## Video generation
 

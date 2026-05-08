@@ -22,17 +22,17 @@ The `type` field is the most useful for programmatic handling.
 
 ## Status codes
 
-| Status | `type`                  | Meaning                                                                                                              |
-| ------ | ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `400`  | `invalid_request_error` | Malformed body, bad field, validation failed                                                                         |
-| `401`  | `invalid_api_key`       | Missing, malformed, revoked, or wrong API key                                                                        |
-| `402`  | `insufficient_quota`    | Not enough credits to complete the request                                                                           |
-| `403`  | —                       | API access requires an active membership; or trying to retrieve another user's video                                 |
-| `404`  | —                       | Video / resource not found                                                                                           |
-| `422`  | `content_policy`        | Upstream content policy rejected the prompt (mostly happens on Google/OpenAI image models, never on uncensored ones) |
-| `429`  | `rate_limit`            | Per-key rate limit hit. Wait the `Retry-After` value or back off exponentially                                       |
-| `502`  | `upstream_error`        | Upstream provider returned an unexpected error                                                                       |
-| `503`  | `service_unavailable`   | Upstream provider out of balance or temporarily down                                                                 |
+| Status | `type`                  | Meaning                                                                                                        |
+| ------ | ----------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `400`  | `invalid_request_error` | Malformed body, bad field, validation failed                                                                   |
+| `401`  | `invalid_api_key`       | Missing, malformed, revoked, or wrong API key                                                                  |
+| `402`  | `insufficient_quota`    | Not enough credits to complete the request                                                                     |
+| `403`  | —                       | API access requires an active membership; or trying to retrieve another user's video                           |
+| `404`  | —                       | Video / resource not found                                                                                     |
+| `422`  | `content_policy`        | Upstream content policy rejected the prompt (mostly happens on third-party image models with built-in filters) |
+| `429`  | `rate_limit`            | Per-key rate limit hit. Wait the `Retry-After` value or back off exponentially                                 |
+| `502`  | `upstream_error`        | Upstream provider returned an unexpected error                                                                 |
+| `503`  | `service_unavailable`   | Upstream provider out of balance or temporarily down                                                           |
 
 ## Retry strategy
 

@@ -1,6 +1,6 @@
 ---
 title: Introduction
-description: "The Dolphy API gives you OpenAI-compatible access to uncensored AI models — chat, image generation, image editing, video, and motion control."
+description: "The Dolphy API gives you OpenAI-compatible access to creative AI models — chat, image generation, image editing, video, and motion control."
 ---
 
 ## What you get
@@ -9,10 +9,10 @@ The Dolphy API exposes the same models that power dolphy.chat, behind a clean
 OpenAI-compatible interface. Drop in the official `openai` SDK, change the
 `baseURL`, and you're up and running.
 
-- **Uncensored chat** — Venice Uncensored 1.1, no content moderation
+- **Creative chat** — Venice 1.1, permissive content policy
 - **25+ image generation models** — from FLUX 2, Nano Banana 2, GPT Image,
   Seedream, Lustify, Chroma, and more
-- **NSFW-capable image editing** with Seedream 4.5
+- **Specialty image editing** with Seedream 4.5
 - **Wan 2.5 / Wan 2.7 video generation** at up to 1080p
 - **Kling v3 motion control** to retarget character motion onto a reference video
 
@@ -56,7 +56,7 @@ print(response.choices[0].message.content)
 | ---------------- | -------------------------------------------------- | -------------------------------------- |
 | Chat             | `POST /v1/chat/completions`                        | OpenAI-compatible, streaming supported |
 | Image generation | `POST /v1/images/generations`                      | OpenAI-compatible                      |
-| Image editing    | `POST /v1/images/edits`                            | NSFW-capable Seedream 4.5              |
+| Image editing    | `POST /v1/images/edits`                            | Specialty Seedream 4.5                 |
 | Video            | `POST /v1/video/queue` + `POST /v1/video/retrieve` | Async — queue then poll                |
 | Motion control   | `POST /v1/video/motion-control`                    | Async, poll via `/v1/video/retrieve`   |
 | Models list      | `GET /v1/models`                                   | Lists everything available             |

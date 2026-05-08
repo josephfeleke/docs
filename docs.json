@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Dolphy API",
-  "description": "OpenAI-compatible API for uncensored chat, image generation, image editing, video, and motion-control.",
+  "description": "OpenAI-compatible API for creative chat, image generation, image editing, video, and motion-control.",
   "colors": {
     "primary": "#a855f7",
     "light": "#c084fc",
