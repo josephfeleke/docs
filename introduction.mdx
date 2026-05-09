@@ -27,7 +27,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: "venice-uncensored",
+  model: "dolphy-chat-1",
   messages: [{ role: "user", content: "Write a sci-fi opening line." }],
 });
 
@@ -43,7 +43,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="venice-uncensored",
+    model="dolphy-chat-1",
     messages=[{"role": "user", "content": "Write a sci-fi opening line."}],
 )
 

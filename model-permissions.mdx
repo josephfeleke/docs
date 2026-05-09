@@ -24,7 +24,7 @@ curl -X PATCH https://dolphy.chat/api/account/api-keys/dpy_live_abc12345 \
   -H "Authorization: Bearer <firebase-id-token>" \
   -H "Content-Type: application/json" \
   -d '{
-    "allowedModels": ["lustify-v8", "venice-uncensored"],
+    "allowedModels": ["lustify-v8", "dolphy-chat-1"],
     "blockedModels": ["nano-banana-pro", "gpt-image-2"]
   }'
 ```
@@ -71,7 +71,7 @@ Blocks every model where `uncensored: true` in the model registry.
 ### "Just chat for the AI agent"
 
 ```json
-{ "allowedModels": ["venice-uncensored"] }
+{ "allowedModels": ["dolphy-chat-1"] }
 ```
 
 Blocks every image and video model. Only chat allowed.

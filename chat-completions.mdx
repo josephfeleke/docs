@@ -17,7 +17,7 @@ in the official `openai` SDK by changing `baseURL`.
 
 ```json
 {
-  "model": "venice-uncensored",
+  "model": "dolphy-chat-1",
   "messages": [
     { "role": "system", "content": "You are a helpful assistant." },
     { "role": "user", "content": "Tell me about Mars." }
@@ -30,7 +30,7 @@ in the official `openai` SDK by changing `baseURL`.
 
 | Field         | Type               | Notes                            |
 | ------------- | ------------------ | -------------------------------- |
-| `model`       | string             | Default `venice-uncensored`      |
+| `model`       | string             | Default `dolphy-chat-1`      |
 | `messages`    | array              | Up to 200 messages, OpenAI shape |
 | `temperature` | number             | 0–2                              |
 | `top_p`       | number             | 0–1                              |
@@ -45,7 +45,7 @@ Set `stream: true` to get token-by-token SSE chunks (OpenAI format with
 
 ```ts
 const stream = await client.chat.completions.create({
-  model: "venice-uncensored",
+  model: "dolphy-chat-1",
   messages: [{ role: "user", content: "Tell me a story." }],
   stream: true,
 });
