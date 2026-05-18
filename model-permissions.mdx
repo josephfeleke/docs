@@ -43,7 +43,7 @@ Pass `null` or `[]` to clear either list.
     "chroma",
     "z-image-turbo",
     "wai-Illustrious",
-    "venice-sd35",
+    "seedream-v4",
     "hidream"
   ]
 }
@@ -51,22 +51,15 @@ Pass `null` or `[]` to clear either list.
 
 All 1-credit/image models. Caps surprise spend on premium models.
 
-### "SFW-only for the customer-facing app"
+### "Restrict to a curated set for a customer-facing app"
 
 ```json
 {
-  "blockedModels": [
-    "lustify-v8",
-    "lustify-v7",
-    "lustify-sdxl",
-    "chroma",
-    "z-image-turbo",
-    "wai-Illustrious"
-  ]
+  "allowedModels": ["flux-2-pro", "seedream-v4", "recraft-v4", "gpt-image-2"]
 }
 ```
 
-Blocks every model where `uncensored: true` in the model registry.
+Only models in `allowedModels` will be accepted by this key. Anything else returns 403.
 
 ### "Just chat for the AI agent"
 

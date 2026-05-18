@@ -26,13 +26,12 @@ with one object per model.
       "pricing": { "credits_per_10k_tokens": 1 }
     },
     {
-      "id": "lustify-v8",
+      "id": "seedream-v4",
       "object": "model",
       "owned_by": "dolphy",
       "capabilities": ["image-generation"],
       "provider": "Specialty",
-      "description": "Newest Lustify — sharpest realism",
-      "uncensored": true,
+      "description": "Photorealistic image generation",
       "pricing": { "credits_per_image": 1 }
     }
     // …
@@ -45,5 +44,4 @@ Each model includes:
 - `id` — pass this string in the relevant endpoint's `model` field
 - `capabilities` — what kind of endpoint accepts it
 - `pricing` — credit cost (per image, per 10k tokens, etc.)
-- `uncensored` (image gen only) — true for specialty creative-mode models that skip provider-side content filtering
 - `provider` (image gen only) — labelling for UI grouping
